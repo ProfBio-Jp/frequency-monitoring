@@ -1,0 +1,239 @@
+function confirmacaodiaria() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência")
+  var ui = SpreadsheetApp.getUi()
+  var buttonPressed = ui.alert("Você quer rodar esse comando?",ui.ButtonSet.YES_NO)
+  
+  if (buttonPressed == ui.Button.YES) {
+  monitoramentofreqdiaria();
+  }
+
+  else { ui.alert("O comando foi cancelado")}
+ 
+}
+
+function confirmacaotresdias() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência")
+  var ui = SpreadsheetApp.getUi()
+  var buttonPressed = ui.alert("Você quer rodar esse comando?",ui.ButtonSet.YES_NO)
+  
+  if (buttonPressed == ui.Button.YES) {
+  monitoramentofreq3dias();
+  }
+
+  else { ui.alert("O comando foi cancelado")}
+ 
+}
+
+
+
+function monitoramentofreq3dias() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência")
+  var dat_atual = new Date()
+  var dia_atual = dia_atual = dat_atual.getDate().toFixed(0);
+    if (dia_atual < 10.0) { dia_atual = "0" + (dia_atual).toString() }
+    else { dia_atual = dat_atual.getDate() }
+  var mes_atual = dat_atual.getMonth() + 1;
+    if (mes_atual <10) {mes_atual = "0" + (dat_atual.getMonth() + 1)}
+    else {mes_atual = dat_atual.getMonth()+1}
+  var ano_atual = dat_atual.getFullYear();
+  
+  var data = dia_atual + "/" + mes_atual + "/" + ano_atual
+  var data_teste = "15/04/2024"
+  lastcolum = sheet.getLastColumn()
+  lastrow = sheet.getLastRow()
+
+  Logger.log(dia_atual)
+
+  datas = sheet.getRange(1,5,1,sheet.getLastColumn())
+  values = datas.getValues();
+  
+  faltosos = []
+  contador = 0
+    
+    for (var j = 6; j <= lastcolum; j++ ) {
+      if (sheet.getRange(1,j).getValue() == data) {
+        //Logger.log(j)
+        for (i = 2; i <= lastrow; i++) {
+          if (sheet.getRange(i,j).getValue() ==  "X" && sheet.getRange(i,j).getValue() == sheet.getRange(i,j-1).getValue() && sheet.getRange(i,j-1).getValue() == sheet.getRange(i,j-2).getValue()) {
+            dado = [sheet.getRange(i,1).getValue(), sheet.getRange(i,2).getValue()]
+            faltosos.push(dado.toString().replace("," , " - "))
+            contador += 1
+          }
+          }
+      }
+    }
+  Logger.log(faltosos)
+  faltosos_string = faltosos.join("_").toString()
+  Logger.log(faltosos_string)
+  
+  if (contador > 1) {
+    prezado = "(" + data + ") - " + "Os seguintes estudantes faltaram três vezes seguidas:\n\n" + faltosos_string.replace(/_/g,"<br/>")
+    Logger.log(prezado)
+
+  }
+  
+  else {
+    prezado = "(" + data + ") - " + "O(a) seguinte estudante faltou três vezes seguidas:\n\n" + faltosos_string.replace(/_/g,"<br/>")
+    Logger.log(prezado)
+  }
+
+
+ var relatorio = DocumentApp.openById("patch_id")
+  
+  var style_header = {};
+    style_header[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] =
+    DocumentApp.HorizontalAlignment.CENTER;
+    style_header[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    style_header[DocumentApp.Attribute.FONT_SIZE] = 18;
+    style_header[DocumentApp.Attribute.BOLD] = true;
+
+  var style_body = {};
+    style_body[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] =
+    DocumentApp.HorizontalAlignment.LEFT;
+    style_body[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    style_body[DocumentApp.Attribute.FONT_SIZE] = 12;
+    style_body[DocumentApp.Attribute.BOLD] = false;
+
+ corpo = relatorio.getBody()
+ sessao = corpo.appendParagraph("\n\nMONITORAMENTO DE FREQUÊNCIA 03 DIAS - " + data)
+ sessao.setAttributes(style_header)
+
+ //var section = corpo.appendParagraph(data);
+ //section.setHeading(DocumentApp.ParagraphHeading.HEADING2)
+
+ monit_diario = corpo.appendParagraph("\nOs seguintes estudantes faltaram três vezes seguidas na data de hoje (" + data + "):\n\n" + faltosos_string.replace(/_/g, "\n"))
+
+ monit_diario.setAttributes(style_body)
+ corpo.appendPageBreak()
+ Logger.log(monit_diario)
+
+
+ /*
+  MailApp.sendEmail({
+ to: "ceefmtigersoncamata@sedu.es.gov.br",
+ subject: "Monitoramento de frequência 3 dias " + " " + data ,
+ htmlBody: "<b>Prezados(as)</b>, <br/><br/>" + prezado.replace("\n", "<br/>")
+ })
+ */
+
+}
+
+
+function monitoramentofreqdiaria() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência")
+  var dat_atual = new Date()
+  var dia_atual = dia_atual = dat_atual.getDate().toFixed(0);
+    if (dia_atual < 10.0) { dia_atual = "0" + (dia_atual).toString() }
+    else { dia_atual = dat_atual.getDate() }
+  var mes_atual = dat_atual.getMonth() + 1;
+    if (mes_atual <10) {mes_atual = "0" + (dat_atual.getMonth() + 1)}
+    else {mes_atual = dat_atual.getMonth()+1}
+  var ano_atual = dat_atual.getFullYear();
+  
+  var data = dia_atual + "/" + mes_atual + "/" + ano_atual
+  Logger.log(data)
+  
+  var data_teste = "15/04/2024"
+  
+  lastcolum = sheet.getLastColumn()
+  lastrow = sheet.getLastRow()
+
+  datas = sheet.getRange(1,5,1,sheet.getLastColumn())
+  values = datas.getValues();
+  
+  Logger.log(datas)
+  Logger.log(sheet.getLastColumn())
+
+  faltadiaria = []
+  for (var j = 6; j <= lastcolum; j++ ) {
+      if (sheet.getRange(1,j).getValue() == data) {
+        
+        for (i = 2; i <= lastrow; i++) {
+          if (sheet.getRange(i,j).getValue() ==  "X"  || sheet.getRange(i,j).getValue() ==  "A" || sheet.getRange(i,j).getValue() ==  "A " || sheet.getRange(i,j).getValue() ==  "x" || sheet.getRange(i,j).getValue() ==  "X " || sheet.getRange(i,j).getValue() ==  "x ")   {
+            dado = [String.fromCodePoint(128204) + sheet.getRange(i,1).getValue(), sheet.getRange(i,2).getValue()]
+            faltadiaria.push(dado.toString().replace("," , " - "))
+            }
+          }
+      }
+    }
+
+  faltadiaria_string = faltadiaria.join("_").toString()
+  Logger.log(faltadiaria_string)
+  
+  /*
+  email = "Os seguintes estudantes faltaram hoje (" + data + "):\n\n" + faltadiaria_string.replace(/_/g,"<br/>")
+  Logger.log(email)
+
+  MailApp.sendEmail({
+  to: "ceefmtigersoncamata@sedu.es.gov.br",
+  subject: "Monitoramento de frequência diária " + " " + data ,
+  htmlBody: "<b>Prezados(as)</b>, <br/><br/>" + email.replace("\n", "<br/>")
+  })
+  */
+
+
+  var relatorio = DocumentApp.openById("patch_Id")
+  
+  var style_header = {};
+    style_header[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] =
+    DocumentApp.HorizontalAlignment.CENTER;
+    style_header[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    style_header[DocumentApp.Attribute.FONT_SIZE] = 18;
+    style_header[DocumentApp.Attribute.BOLD] = true;
+
+  var style_body = {};
+    style_body[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] =
+    DocumentApp.HorizontalAlignment.LEFT;
+    style_body[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    style_body[DocumentApp.Attribute.FONT_SIZE] = 12;
+    style_body[DocumentApp.Attribute.BOLD] = false;
+
+corpo = relatorio.getBody()
+sessao = corpo.appendParagraph("MONITORAMENTO DE FREQUÊNCIA - " + data)
+sessao.setAttributes(style_header)
+
+//var section = corpo.appendParagraph(data);
+//section.setHeading(DocumentApp.ParagraphHeading.HEADING2)
+
+monit_diario = corpo.appendParagraph("\nOs seguintes estudantes faltaram hoje (" + data + "):\n\n" + faltadiaria_string.replace(/_/g,"\n"))
+monit_diario.setAttributes(style_body)
+corpo.appendPageBreak()
+Logger.log(monit_diario)
+} 
+
+
+function teste() {
+  
+  /*
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência");
+  var dat_atual = new Date();
+  var dia_atual = dat_atual.getDate().toFixed(0)
+  
+  Logger.log(dia_atual < 10)
+  
+  if (dia_atual < 10.0) { dia_atual = "0" + (dia_atual).toString() }
+  else { dia_atual = dat_atual.getDate() }
+
+  var mes_atual = "0" + (dat_atual.getMonth() + 1);
+  var ano_atual = dat_atual.getFullYear();
+  
+  var data = dia_atual + "/" + mes_atual + "/" + ano_atual
+  Logger.log(dia_atual)
+  Logger.log(data)
+
+  */
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Monitoramento de Frequência")
+  var dat_atual = new Date()
+  var dia_atual = dia_atual = dat_atual.getDate().toFixed(0);
+    if (dia_atual < 10.0) { dia_atual = "0" + (dia_atual).toString() }
+    else { dia_atual = dat_atual.getDate() }
+  var mes_atual = dat_atual.getMonth() + 1;
+    if (mes_atual <10) {mes_atual = "0" + (dat_atual.getMonth() + 1)}
+    else {mes_atual = dat_atual.getMonth()+1}
+  var ano_atual = dat_atual.getFullYear();
+  Logger.log(mes_atual)
+
+
+}
